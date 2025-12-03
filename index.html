@@ -456,8 +456,9 @@
             <ul>
                 <li>Prices are estimates based on publicly available pricing as of 2025</li>
                 <li>AWS, Azure, and GCP use tiered pricing - costs decrease at higher volumes</li>
-                <li>Free egress tiers are applied: Backblaze (3x storage), DigitalOcean (1 TB), Hetzner (1 TB), Scaleway (75 GB)</li>
-                <li>Free storage: DigitalOcean (250 GB), Scaleway (75 GB), Backblaze (10 GB)</li>
+                <li>Free egress: Backblaze (3x storage), Hetzner (1 TB), Scaleway (75 GB)</li>
+                <li>Free storage: Scaleway (75 GB), Backblaze (10 GB)</li>
+                <li>DigitalOcean has a $5/month base plan including 250 GB storage and 1 TB egress</li>
                 <li>Actual costs may vary based on region, discounts, and specific usage patterns</li>
                 <li>European providers (OVH, Hetzner, Scaleway) display prices in EUR, sorted by USD equivalent</li>
             </ul>
@@ -545,14 +546,15 @@
                 logo: 'DO',
                 logoClass: 'logo-do',
                 currency: 'USD',
+                baseCost: 5,           // $5/month base price
                 storageTiers: [
                     { upTo: Infinity, price: 0.02 }
                 ],
                 egressTiers: [
                     { upTo: Infinity, price: 0.01 }
                 ],
-                freeEgress: 1000,      // 1TB free egress
-                freeStorage: 250       // 250GB included
+                freeEgress: 1000,      // 1TB included in base
+                freeStorage: 250       // 250GB included in base
             },
             {
                 id: 'ovh',
@@ -657,10 +659,10 @@
 
         // Calculate cost for a provider
         function calculateCost(provider, storageGB, egressGB) {
-            // Apply free storage
+            // Apply free/included storage
             const billableStorage = Math.max(0, storageGB - (provider.freeStorage || 0));
 
-            // Calculate free egress (fixed amount or multiplier of storage)
+            // Calculate free/included egress (fixed amount or multiplier of storage)
             let freeEgressAmount = provider.freeEgress || 0;
             if (provider.freeEgressMultiplier) {
                 freeEgressAmount = storageGB * provider.freeEgressMultiplier;
@@ -668,15 +670,17 @@
             const billableEgress = Math.max(0, egressGB - freeEgressAmount);
 
             // Calculate costs using tiered pricing
+            const baseCost = provider.baseCost || 0;
             const storageCost = calculateTieredCost(billableStorage, provider.storageTiers);
             const egressCost = calculateTieredCost(billableEgress, provider.egressTiers);
-            const total = storageCost + egressCost;
+            const total = baseCost + storageCost + egressCost;
 
             // Calculate USD equivalent for sorting
             const toUsd = provider.currency === 'EUR' ? EUR_TO_USD : 1;
             const totalUsd = total * toUsd;
 
             return {
+                baseCost: baseCost,
                 storage: storageCost,
                 egress: egressCost,
                 freeEgress: freeEgressAmount,
@@ -689,11 +693,21 @@
         // Create provider card HTML
         function createProviderCard(provider, costs, isBestValue) {
             const cur = costs.currency;
+            const hasBaseCost = costs.baseCost > 0;
+            const includedLabel = hasBaseCost ? 'incl.' : 'free';
+
             const freeEgressNote = costs.freeEgress > 0
-                ? `<span class="free-note">(${costs.freeEgress >= 1000 ? (costs.freeEgress/1000) + ' TB' : costs.freeEgress + ' GB'} free)</span>`
+                ? `<span class="free-note">(${costs.freeEgress >= 1000 ? (costs.freeEgress/1000) + ' TB' : costs.freeEgress + ' GB'} ${includedLabel})</span>`
                 : '';
             const freeStorageNote = provider.freeStorage > 0
-                ? `<span class="free-note">(${provider.freeStorage} GB free)</span>`
+                ? `<span class="free-note">(${provider.freeStorage} GB ${includedLabel})</span>`
+                : '';
+
+            const baseRow = hasBaseCost
+                ? `<div class="price-row">
+                            <span class="price-row-label">Base plan</span>
+                            <span class="price-row-value">${formatCurrency(costs.baseCost * 12, cur)}</span>
+                        </div>`
                 : '';
 
             return `
@@ -706,6 +720,7 @@
                         </div>
                     </div>
                     <div class="price-breakdown">
+                        ${baseRow}
                         <div class="price-row">
                             <span class="price-row-label">Storage ${freeStorageNote}</span>
                             <span class="price-row-value">${formatCurrency(costs.storage * 12, cur)}</span>

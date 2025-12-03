@@ -14,16 +14,18 @@ Interactive calculator comparing cloud object storage pricing across major provi
 
 ## Providers
 
-| Provider | Currency | Free Storage | Free Egress |
-|----------|----------|--------------|-------------|
-| AWS S3 | USD | - | - |
-| Azure Blob | USD | - | - |
-| Google Cloud | USD | - | - |
-| DigitalOcean | USD | 250 GB | 1 TB |
-| OVH | EUR | - | - |
-| Hetzner | EUR | - | 1 TB |
-| Scaleway | EUR | 75 GB | 75 GB |
-| Backblaze B2 | USD | 10 GB | 3x storage |
+| Provider | Currency | Free Storage | Free Egress | Base Cost |
+|----------|----------|--------------|-------------|-----------|
+| AWS S3 | USD | - | - | - |
+| Azure Blob | USD | - | - | - |
+| Google Cloud | USD | - | - | - |
+| DigitalOcean | USD | 250 GB* | 1 TB* | $5/month |
+| OVH | EUR | - | - | - |
+| Hetzner | EUR | - | 1 TB | - |
+| Scaleway | EUR | 75 GB | 75 GB | - |
+| Backblaze B2 | USD | 10 GB | 3x storage | - |
+
+\* Included in base plan
 
 ## License
 
