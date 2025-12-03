@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Storage Pricing Comparison</title>
+    <style>
+        :root {
+            --primary: #1a1f36;
+            --accent: #635bff;
+            --accent-light: #7c75ff;
+            --success: #00d4aa;
+            --bg-light: #f7f9fc;
+            --bg-card: #ffffff;
+            --text-primary: #1a1f36;
+            --text-secondary: #697386;
+            --border: #e6e9ed;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        header p {
+            font-size: 1.125rem;
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Calculator Section */
+        .calculator-section {
+            background: white;
+            margin: -30px auto 40px;
+            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .calculator-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 32px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .slider-group {
+            margin-bottom: 32px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .slider-value {
+            background: var(--accent);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(99, 91, 255, 0.4);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(99, 91, 255, 0.4);
+        }
+
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Results Section */
+        .results-section {
+            padding: 40px 0 80px;
+        }
+
+        .results-section h2 {
+            text-align: center;
+            font-size: 1.75rem;
+            margin-bottom: 40px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .provider-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .provider-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .provider-card.best-value {
+            border-color: var(--success);
+        }
+
+        .provider-card.best-value::before {
+            content: 'Best Value';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .provider-card {
+            position: relative;
+        }
+
+        .provider-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .provider-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .provider-name {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .provider-region {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .price-breakdown {
+            margin-bottom: 20px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .price-row:last-child {
+            border-bottom: none;
+        }
+
+        .price-row-label {
+            color: var(--text-secondary);
+        }
+
+        .price-row-value {
+            font-weight: 500;
+        }
+
+        .free-note {
+            color: var(--success);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .total-price {
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .total-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .total-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .total-period {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Provider Colors */
+        .logo-aws { background: linear-gradient(135deg, #ff9900, #ff6600); }
+        .logo-azure { background: linear-gradient(135deg, #0078d4, #00bcf2); }
+        .logo-gcp { background: linear-gradient(135deg, #4285f4, #34a853); }
+        .logo-do { background: linear-gradient(135deg, #0080ff, #0061c2); }
+        .logo-ovh { background: linear-gradient(135deg, #123f6d, #0050a1); }
+        .logo-hetzner { background: linear-gradient(135deg, #d50c2d, #a00a23); }
+        .logo-scaleway { background: linear-gradient(135deg, #4f0599, #7c3aed); }
+        .logo-backblaze { background: linear-gradient(135deg, #e21e26, #b31217); }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        footer p {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-light);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            .calculator-section {
+                margin: -20px 16px 32px;
+                padding: 24px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sort Controls */
+        .sort-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .sort-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sort-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* Notes */
+        .notes {
+            max-width: 800px;
+            margin: 0 auto 60px;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .notes h3 {
+            margin-bottom: 16px;
+            font-size: 1.125rem;
+        }
+
+        .notes ul {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .notes li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .notes li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Object Storage Pricing Comparison</h1>
+            <p>Compare cloud storage costs across major providers. Adjust your usage below to see real-time pricing estimates.</p>
+        </div>
+    </header>
+
+    <div class="calculator-section">
+        <h2>Calculate Your Costs</h2>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span class="slider-label">Storage</span>
+                <span class="slider-value" id="storage-value">100 GB</span>
+            </div>
+            <input type="range" id="storage-slider" min="0" max="10000" value="100" step="10">
+            <div class="slider-scale">
+                <span>0 GB</span>
+                <span>2 TB</span>
+                <span>4 TB</span>
+                <span>6 TB</span>
+                <span>8 TB</span>
+                <span>10 TB</span>
+            </div>
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span class="slider-label">Egress / Bandwidth</span>
+                <span class="slider-value" id="egress-value">50 GB</span>
+            </div>
+            <input type="range" id="egress-slider" min="0" max="10000" value="50" step="10">
+            <div class="slider-scale">
+                <span>0 GB</span>
+                <span>2 TB</span>
+                <span>4 TB</span>
+                <span>6 TB</span>
+                <span>8 TB</span>
+                <span>10 TB</span>
+            </div>
+        </div>
+
+        </div>
+
+    <section class="results-section">
+        <div class="container">
+            <h2>Annual Cost Comparison</h2>
+
+            <div class="sort-controls">
+                <button class="sort-btn active" data-sort="price">Sort by Price</button>
+                <button class="sort-btn" data-sort="name">Sort by Name</button>
+            </div>
+
+            <div class="results-grid" id="results-grid">
+                <!-- Cards will be generated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="notes">
+            <h3>Notes</h3>
+            <ul>
+                <li>Prices are estimates based on publicly available pricing as of 2025</li>
+                <li>AWS, Azure, and GCP use tiered pricing - costs decrease at higher volumes</li>
+                <li>Free egress tiers are applied: Backblaze (3x storage), DigitalOcean (1 TB), Hetzner (1 TB), Scaleway (75 GB)</li>
+                <li>Free storage: DigitalOcean (250 GB), Scaleway (75 GB), Backblaze (10 GB)</li>
+                <li>Actual costs may vary based on region, discounts, and specific usage patterns</li>
+                <li>European providers (OVH, Hetzner, Scaleway) display prices in EUR, sorted by USD equivalent</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Data sourced from provider pricing pages. Not affiliated with any provider.</p>
+            <p style="margin-top: 8px;">Built for comparison purposes only.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Provider pricing data with tiered pricing and free egress
+        const EUR_TO_USD = 1.09; // Approximate conversion rate
+
+        const providers = [
+            {
+                id: 'aws',
+                name: 'AWS S3',
+                region: 'US Standard',
+                logo: 'AWS',
+                logoClass: 'logo-aws',
+                currency: 'USD',
+                // Tiered storage: first 50TB, next 450TB, over 500TB
+                storageTiers: [
+                    { upTo: 50000, price: 0.023 },
+                    { upTo: 500000, price: 0.022 },
+                    { upTo: Infinity, price: 0.021 }
+                ],
+                // Tiered egress: first 10TB, next 40TB, next 100TB, over 150TB
+                egressTiers: [
+                    { upTo: 10000, price: 0.09 },
+                    { upTo: 50000, price: 0.085 },
+                    { upTo: 150000, price: 0.07 },
+                    { upTo: Infinity, price: 0.05 }
+                ],
+                freeEgress: 0,
+                freeStorage: 0
+            },
+            {
+                id: 'azure',
+                name: 'Azure Blob',
+                region: 'Hot tier',
+                logo: 'AZ',
+                logoClass: 'logo-azure',
+                currency: 'USD',
+                storageTiers: [
+                    { upTo: 50000, price: 0.0208 },
+                    { upTo: 500000, price: 0.02 },
+                    { upTo: Infinity, price: 0.0192 }
+                ],
+                egressTiers: [
+                    { upTo: 10000, price: 0.087 },
+                    { upTo: 50000, price: 0.083 },
+                    { upTo: 150000, price: 0.07 },
+                    { upTo: Infinity, price: 0.05 }
+                ],
+                freeEgress: 0,
+                freeStorage: 0
+            },
+            {
+                id: 'gcp',
+                name: 'Google Cloud',
+                region: 'US Multi-region',
+                logo: 'GCP',
+                logoClass: 'logo-gcp',
+                currency: 'USD',
+                storageTiers: [
+                    { upTo: Infinity, price: 0.023 }
+                ],
+                egressTiers: [
+                    { upTo: 1000, price: 0.12 },
+                    { upTo: 10000, price: 0.11 },
+                    { upTo: Infinity, price: 0.08 }
+                ],
+                freeEgress: 0,
+                freeStorage: 0
+            },
+            {
+                id: 'do',
+                name: 'DigitalOcean',
+                region: 'Spaces',
+                logo: 'DO',
+                logoClass: 'logo-do',
+                currency: 'USD',
+                storageTiers: [
+                    { upTo: Infinity, price: 0.02 }
+                ],
+                egressTiers: [
+                    { upTo: Infinity, price: 0.01 }
+                ],
+                freeEgress: 1000,      // 1TB free egress
+                freeStorage: 250       // 250GB included
+            },
+            {
+                id: 'ovh',
+                name: 'OVH',
+                region: 'Object Storage',
+                logo: 'OVH',
+                logoClass: 'logo-ovh',
+                currency: 'EUR',
+                storageTiers: [
+                    { upTo: Infinity, price: 0.00746 }
+                ],
+                egressTiers: [
+                    { upTo: Infinity, price: 0.01 }
+                ],
+                freeEgress: 0,
+                freeStorage: 0
+            },
+            {
+                id: 'hetzner',
+                name: 'Hetzner',
+                region: 'Object Storage',
+                logo: 'HZ',
+                logoClass: 'logo-hetzner',
+                currency: 'EUR',
+                storageTiers: [
+                    { upTo: Infinity, price: 0.00487 }
+                ],
+                egressTiers: [
+                    { upTo: Infinity, price: 0.00098 }
+                ],
+                freeEgress: 1000,      // 1TB free egress included
+                freeStorage: 0
+            },
+            {
+                id: 'scaleway',
+                name: 'Scaleway',
+                region: 'Object Storage',
+                logo: 'SCW',
+                logoClass: 'logo-scaleway',
+                currency: 'EUR',
+                storageTiers: [
+                    { upTo: Infinity, price: 0.012 }
+                ],
+                egressTiers: [
+                    { upTo: Infinity, price: 0.01 }
+                ],
+                freeEgress: 75,        // 75GB free egress
+                freeStorage: 75        // 75GB free storage
+            },
+            {
+                id: 'backblaze',
+                name: 'Backblaze B2',
+                region: 'US West',
+                logo: 'B2',
+                logoClass: 'logo-backblaze',
+                currency: 'USD',
+                storageTiers: [
+                    { upTo: Infinity, price: 0.006 }
+                ],
+                egressTiers: [
+                    { upTo: Infinity, price: 0.01 }
+                ],
+                freeEgress: 0,
+                freeEgressMultiplier: 3, // Free egress = 3x storage
+                freeStorage: 10        // 10GB free
+            }
+        ];
+
+        // Format number with commas
+        function formatNumber(num) {
+            return num.toLocaleString('en-US');
+        }
+
+        // Format currency
+        function formatCurrency(amount, currency = 'USD') {
+            const symbol = currency === 'EUR' ? '€' : '$';
+            if (amount < 0.01 && amount > 0) {
+                return symbol + amount.toFixed(4);
+            }
+            return symbol + amount.toFixed(2);
+        }
+
+        // Calculate tiered cost
+        function calculateTieredCost(amountGB, tiers) {
+            let cost = 0;
+            let remaining = amountGB;
+            let prevLimit = 0;
+
+            for (const tier of tiers) {
+                const tierSize = tier.upTo - prevLimit;
+                const amountInTier = Math.min(remaining, tierSize);
+
+                if (amountInTier <= 0) break;
+
+                cost += amountInTier * tier.price;
+                remaining -= amountInTier;
+                prevLimit = tier.upTo;
+            }
+
+            return cost;
+        }
+
+        // Calculate cost for a provider
+        function calculateCost(provider, storageGB, egressGB) {
+            // Apply free storage
+            const billableStorage = Math.max(0, storageGB - (provider.freeStorage || 0));
+
+            // Calculate free egress (fixed amount or multiplier of storage)
+            let freeEgressAmount = provider.freeEgress || 0;
+            if (provider.freeEgressMultiplier) {
+                freeEgressAmount = storageGB * provider.freeEgressMultiplier;
+            }
+            const billableEgress = Math.max(0, egressGB - freeEgressAmount);
+
+            // Calculate costs using tiered pricing
+            const storageCost = calculateTieredCost(billableStorage, provider.storageTiers);
+            const egressCost = calculateTieredCost(billableEgress, provider.egressTiers);
+            const total = storageCost + egressCost;
+
+            // Calculate USD equivalent for sorting
+            const toUsd = provider.currency === 'EUR' ? EUR_TO_USD : 1;
+            const totalUsd = total * toUsd;
+
+            return {
+                storage: storageCost,
+                egress: egressCost,
+                freeEgress: freeEgressAmount,
+                total: total,
+                totalUsd: totalUsd,
+                currency: provider.currency
+            };
+        }
+
+        // Create provider card HTML
+        function createProviderCard(provider, costs, isBestValue) {
+            const cur = costs.currency;
+            const freeEgressNote = costs.freeEgress > 0
+                ? `<span class="free-note">(${costs.freeEgress >= 1000 ? (costs.freeEgress/1000) + ' TB' : costs.freeEgress + ' GB'} free)</span>`
+                : '';
+            const freeStorageNote = provider.freeStorage > 0
+                ? `<span class="free-note">(${provider.freeStorage} GB free)</span>`
+                : '';
+
+            return `
+                <div class="provider-card ${isBestValue ? 'best-value' : ''}" data-total="${costs.totalUsd}" data-name="${provider.name}">
+                    <div class="provider-header">
+                        <div class="provider-logo ${provider.logoClass}">${provider.logo}</div>
+                        <div>
+                            <div class="provider-name">${provider.name}</div>
+                            <div class="provider-region">${provider.region}</div>
+                        </div>
+                    </div>
+                    <div class="price-breakdown">
+                        <div class="price-row">
+                            <span class="price-row-label">Storage ${freeStorageNote}</span>
+                            <span class="price-row-value">${formatCurrency(costs.storage, cur)}</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="price-row-label">Egress ${freeEgressNote}</span>
+                            <span class="price-row-value">${formatCurrency(costs.egress, cur)}</span>
+                        </div>
+                    </div>
+                    <div class="total-price">
+                        <div class="total-label">Estimated Annual Cost</div>
+                        <div class="total-value">${formatCurrency(costs.total * 12, cur)}</div>
+                        <div class="total-period">per year</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update display values
+        function updateSliderDisplay(sliderId, valueId, value, suffix = '') {
+            const display = document.getElementById(valueId);
+            if (value >= 1000) {
+                display.textContent = (value / 1000).toFixed(1) + ' TB' + suffix;
+            } else {
+                display.textContent = formatNumber(value) + ' GB' + suffix;
+            }
+        }
+
+        // Render all provider cards
+        function renderCards(sortBy = 'price') {
+            const storageGB = parseFloat(document.getElementById('storage-slider').value);
+            const egressGB = parseFloat(document.getElementById('egress-slider').value);
+
+            // Calculate costs for all providers
+            const results = providers.map(provider => ({
+                provider,
+                costs: calculateCost(provider, storageGB, egressGB)
+            }));
+
+            // Sort results
+            if (sortBy === 'price') {
+                results.sort((a, b) => a.costs.totalUsd - b.costs.totalUsd);
+            } else {
+                results.sort((a, b) => a.provider.name.localeCompare(b.provider.name));
+            }
+
+            // Find best value (lowest total in USD)
+            const minTotalUsd = Math.min(...results.map(r => r.costs.totalUsd));
+
+            // Generate HTML
+            const grid = document.getElementById('results-grid');
+            grid.innerHTML = results.map(({ provider, costs }) =>
+                createProviderCard(provider, costs, costs.totalUsd === minTotalUsd && sortBy === 'price')
+            ).join('');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const storageSlider = document.getElementById('storage-slider');
+            const egressSlider = document.getElementById('egress-slider');
+
+            // Update on slider change
+            storageSlider.addEventListener('input', (e) => {
+                updateSliderDisplay('storage-slider', 'storage-value', e.target.value);
+                renderCards(document.querySelector('.sort-btn.active').dataset.sort);
+            });
+
+            egressSlider.addEventListener('input', (e) => {
+                updateSliderDisplay('egress-slider', 'egress-value', e.target.value);
+                renderCards(document.querySelector('.sort-btn.active').dataset.sort);
+            });
+
+            // Sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderCards(btn.dataset.sort);
+                });
+            });
+
+            // Initial render
+            renderCards();
+        });
+    </script>
+</body>
+</html>
