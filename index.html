@@ -708,11 +708,11 @@
                     <div class="price-breakdown">
                         <div class="price-row">
                             <span class="price-row-label">Storage ${freeStorageNote}</span>
-                            <span class="price-row-value">${formatCurrency(costs.storage, cur)}</span>
+                            <span class="price-row-value">${formatCurrency(costs.storage * 12, cur)}</span>
                         </div>
                         <div class="price-row">
                             <span class="price-row-label">Egress ${freeEgressNote}</span>
-                            <span class="price-row-value">${formatCurrency(costs.egress, cur)}</span>
+                            <span class="price-row-value">${formatCurrency(costs.egress * 12, cur)}</span>
                         </div>
                     </div>
                     <div class="total-price">
